@@ -27,7 +27,6 @@ public class SocketConnectionScript : MonoBehaviour
                 Debug.Log("Connected to the server.");
                 await client.EmitAsync(GetAllApartmentsEvent);
             };
-
             client.On("apartments", response =>
             {
                 Debug.Log(response);
@@ -50,14 +49,14 @@ public class SocketConnectionScript : MonoBehaviour
             Debug.Log("SocketIO client already exists; reusing the existing instance.");
         }
     }
-    public async void EmitHandleConfirm()
+    public async void EmitHandleConfirm(string apartmentId)
     {
         if (client != null && client.Connected)
         {
             // Tạo dữ liệu JSON gửi đến server
             var apartmentUpdate = new
             {
-                id = "A1004",
+                id = apartmentId,
                 idEmployee = "nv3",
                 status = "pending"
             };
@@ -67,7 +66,19 @@ public class SocketConnectionScript : MonoBehaviour
             //Debug.Log($"Phát sự kiện mua cho căn hộ ID: {apartmentId}, Employee ID: {employeeId}");
         }
     }
-
+    public async void EmitSoldConfirm()
+    {
+        if (client != null && client.Connected)
+        {
+            var apartmentUpdate = new
+            {
+                id = "A1004",
+                idEmployee = "nv3",
+                status = "confirm"
+            };
+            await client.EmitAsync(updateStatusToSold, apartmentUpdate);
+        }
+    }
 
 
     private async void OnDestroy()
