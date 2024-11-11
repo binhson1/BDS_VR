@@ -31,14 +31,35 @@ public class ApartmentManagerScript : MonoBehaviour
     // Queue to store apartment data updates
     private ConcurrentQueue<ApartmentData[]> apartmentDataQueue = new ConcurrentQueue<ApartmentData[]>();
 
+    private Dictionary<string, ApartmentData> apartmentDataDict = new Dictionary<string, ApartmentData>();
+
     void Update()
     {
-        // Process all queued apartment data updates
+        // Process queued data and update colors as before
         while (apartmentDataQueue.TryDequeue(out ApartmentData[] apartments))
         {
-            Debug.Log("OKEY");
+            foreach (var apartment in apartments)
+            {
+                apartmentDataDict[apartment.id] = apartment; // Cập nhật dữ liệu căn hộ trong dictionary
+            }
+
             UpdateCubeColors(apartments);
         }
+    }
+
+    // Thêm phương thức để lấy căn hộ theo ID
+    public ApartmentData GetApartmentById(string id)
+    {
+        Debug.Log("BUY");
+        // Trả về ApartmentData nếu tồn tại trong dictionary, ngược lại trả về null
+        if (apartmentDataDict.TryGetValue(id, out ApartmentData apartment))
+        {
+            return apartment;
+            Debug.Log("OKEY BUY");
+        }
+        return null;
+        Debug.Log("CANCEL BUY");
+
     }
 
     public void EnqueueApartmentData(ApartmentData[] apartments)
@@ -57,7 +78,7 @@ public class ApartmentManagerScript : MonoBehaviour
                 GameObject cube = GameObject.Find(apartment.id);
                 if (cube != null)
                 {
-                    Debug.Log("OKEY");
+                    //Debug.Log("OKEY");
                     MeshRenderer renderer = cube.GetComponent<MeshRenderer>();
                     renderer.material.color = statusColors[apartment.status];
                 }

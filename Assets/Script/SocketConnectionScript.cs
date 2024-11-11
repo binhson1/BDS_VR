@@ -41,8 +41,26 @@ public class SocketConnectionScript : MonoBehaviour
                     apartmentManager.EnqueueApartmentData(apartments);
                 }
             });
-
-            await client.ConnectAsync();
+            client.On("isChangeStatus", response =>
+            {
+                if (response != null)
+                {
+                    client.EmitAsync(GetAllApartmentsEvent);
+                }
+            });
+            client.On("updateStatusToPending", response =>
+            {
+                if (response.ToString() == "[1]")
+                {
+                    Debug.Log("Success");
+                    ApartmentManagerScript.Qu
+                }
+                if (response.ToString() == "[0]")
+                {
+                    Debug.Log("Fail");
+                }
+            });
+            await client.ConnectAsync();            
         }
         else
         {
@@ -58,7 +76,7 @@ public class SocketConnectionScript : MonoBehaviour
             {
                 id = apartmentId,
                 idEmployee = "nv3",
-                status = "pending"
+                status = "Chờ bán"
             };
 
             // Phát sự kiện "handleConfirmPendingButton" kèm theo dữ liệu
@@ -66,21 +84,32 @@ public class SocketConnectionScript : MonoBehaviour
             //Debug.Log($"Phát sự kiện mua cho căn hộ ID: {apartmentId}, Employee ID: {employeeId}");
         }
     }
-    public async void EmitSoldConfirm()
+
+    public async void EmitSoldConfirm(string apartmentId)
     {
         if (client != null && client.Connected)
         {
             var apartmentUpdate = new
             {
-                id = "A1004",
+                id = apartmentId,
                 idEmployee = "nv3",
-                status = "confirm"
+                status = "Đặt cọc"
             };
             await client.EmitAsync(updateStatusToSold, apartmentUpdate);
         }
     }
 
-
+    public async void EmitGetEmployee()
+    {
+        if(client != null && client.Connected)
+        {
+            await client.EmitAsync("getAllEmployee");
+        }
+        else
+        {
+            Debug.Log("Can't get Employee");
+        }
+    }
     private async void OnDestroy()
     {
         if (client != null && client.Connected)

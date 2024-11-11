@@ -3,21 +3,30 @@ using TMPro;
 
 public class ApartmentUIController : MonoBehaviour
 {
-    // Tham chiếu đến TextMeshPro để hiển thị tên của căn hộ
     public TextMeshProUGUI apartmentText;
+    public GameObject menu;
 
-    public GameObject menu;    
-
+    // Tham chiếu đến ApartmentManagerScript để lấy dữ liệu căn hộ
+    public ApartmentManagerScript apartmentManager;
+    public SocketConnectionScript socketConnectionScript;
+    public Buying buyingScript;
     // Hàm kiểm tra trạng thái căn hộ và cập nhật UI
     public void CheckAndDisplayApartmentInfo()
-    {                     
-        apartmentText.text = $"Buy {gameObject.name}";          
-        menu.SetActive(true);
-    }
-
-    // Gọi hàm này khi cần kiểm tra trạng thái, ví dụ trong Start hoặc khi có sự kiện thay đổi trạng thái
-    void Start()
     {
-        CheckAndDisplayApartmentInfo();
+        Debug.Log("CHECK");
+        ApartmentData currentApartment = apartmentManager.GetApartmentById(gameObject.name);
+
+        if (currentApartment != null && currentApartment.status == "Chờ bán")
+        {
+            apartmentText.text = $"Buy {currentApartment.id}";
+            menu.SetActive(true);
+
+            // Gửi thông tin căn hộ sang BuyingScript để lưu lại cho việc mua sau
+            buyingScript.PrepareForPurchase(currentApartment);
+        }
+        else
+        {
+            Debug.Log("Apartment is not available for display or purchase.");
+        }
     }
 }
