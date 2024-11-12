@@ -3,18 +3,24 @@ using SocketIOClient;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections;
+using TMPro;
 
 public class SocketConnectionScript : MonoBehaviour
 {
     private static SocketIO client;
+    public TextMeshProUGUI menuUI;
     public ApartmentManagerScript apartmentManager;
+    public GameObject buyingMenu;
+    public GameObject buttonYes;
+    public GameObject buttonNo;
     private const string getAllEmployee = "getAllEmployee";
     private const string GetAllApartmentsEvent = "getAllApartment";
     private const string getApartmentByBlock = "getApartmentByBlock";
     private const string updateStatusToPending = "updateStatusToPending";
     private const string updateStatusToSold = "updateStatusToSold";
+    private ConcurrentQueue<string> responseQueue = new ConcurrentQueue<string>();
     void Start()
-    {
+    {       
         InitializeSocketClient();
     }
     private async void InitializeSocketClient()
@@ -48,28 +54,77 @@ public class SocketConnectionScript : MonoBehaviour
                     client.EmitAsync(GetAllApartmentsEvent);
                 }
             });
-            client.On("updateStatusToPending", response =>
+            client.On(updateStatusToPending, response =>
             {
-                if (response.ToString() == "[1]")
-                {
-                    Debug.Log("Success");
-                    ApartmentManagerScript.Qu
-                }
-                if (response.ToString() == "[0]")
-                {
-                    Debug.Log("Fail");
-                }
+                //Debug.Log("Du lieu chuoi" + response.ToString().Trim());
+                //if (response.ToString() == "[[1]]")
+                //{
+                //    Debug.Log("Success");
+                //    client.EmitAsync(GetAllApartmentsEvent);
+                //    buttonNo.SetActive(false);
+                //    buttonYes.SetActive(false);
+                //    menuUI.text = $"Buy Success !";
+                //    Invoke("DeactivateBuyingMenu", 2f); // Gọi hàm sau 2 giây
+                //}
+                //else if (response.ToString() == "[[0]]")
+                //{
+                //    buttonNo.SetActive(false);
+                //    buttonYes.SetActive(false);
+                //    menuUI.text = $"Try Again Later !";
+                //    Debug.Log("Fail");
+                //    Invoke("DeactivateBuyingMenu", 2f); // Gọi hàm sau 2 giây
+                //}
+                responseQueue.Enqueue(response.ToString().Trim());
+
             });
-            await client.ConnectAsync();            
+            await client.ConnectAsync();
         }
         else
         {
             Debug.Log("SocketIO client already exists; reusing the existing instance.");
         }
     }
+
+    void Update()
+    {
+        // Xử lý các phản hồi từ hàng đợi
+        while (responseQueue.TryDequeue(out string response))
+        {
+            ProcessResponse(response);
+        }
+    }
+
+    // Hàm xử lý phản hồi, dựa trên giá trị của response
+    private void ProcessResponse(string response)
+    {
+        Debug.Log("Processing response: " + response);
+
+        if (response == "[[1]]")
+        {
+            Debug.Log("Success");
+            client.EmitAsync(GetAllApartmentsEvent);
+            buttonNo.SetActive(false);
+            buttonYes.SetActive(false);
+            menuUI.text = "Buy Success !";
+            Invoke("DeactivateBuyingMenu", 2f); // Gọi hàm sau 2 giây
+        }
+        else if (response == "[[0]]")
+        {
+            buttonNo.SetActive(false);
+            buttonYes.SetActive(false);
+            menuUI.text = "Try Again Later !";
+            Debug.Log("Fail");
+            Invoke("DeactivateBuyingMenu", 2f); // Gọi hàm sau 2 giây
+        }
+    }
+    void DeactivateBuyingMenu()
+    {
+        buyingMenu.SetActive(false);
+    }
     public async void EmitHandleConfirm(string apartmentId)
     {
-        if (client != null && client.Connected)
+        Debug.Log("OKEY");
+        //if (client != null && client.Connected)
         {
             // Tạo dữ liệu JSON gửi đến server
             var apartmentUpdate = new
@@ -79,11 +134,13 @@ public class SocketConnectionScript : MonoBehaviour
                 status = "Chờ bán"
             };
 
-            // Phát sự kiện "handleConfirmPendingButton" kèm theo dữ liệu
+            // Chuyển đổi thành JSON string nếu cần
+            var jsonData = JsonConvert.SerializeObject(apartmentUpdate);
+            Debug.Log(jsonData);
+            // Phát sự kiện "handleConfirmPendingButton" kèm theo dữ liệu JSON
             await client.EmitAsync(updateStatusToPending, apartmentUpdate);
-            //Debug.Log($"Phát sự kiện mua cho căn hộ ID: {apartmentId}, Employee ID: {employeeId}");
         }
-    }
+    }   
 
     public async void EmitSoldConfirm(string apartmentId)
     {

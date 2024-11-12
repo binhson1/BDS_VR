@@ -49,17 +49,13 @@ public class ApartmentManagerScript : MonoBehaviour
 
     // Thêm phương thức để lấy căn hộ theo ID
     public ApartmentData GetApartmentById(string id)
-    {
-        Debug.Log("BUY");
+    {        
         // Trả về ApartmentData nếu tồn tại trong dictionary, ngược lại trả về null
         if (apartmentDataDict.TryGetValue(id, out ApartmentData apartment))
         {
-            return apartment;
-            Debug.Log("OKEY BUY");
+            return apartment;            
         }
-        return null;
-        Debug.Log("CANCEL BUY");
-
+        return null;        
     }
 
     public void EnqueueApartmentData(ApartmentData[] apartments)

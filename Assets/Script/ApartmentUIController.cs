@@ -16,7 +16,7 @@ public class ApartmentUIController : MonoBehaviour
         Debug.Log("CHECK");
         ApartmentData currentApartment = apartmentManager.GetApartmentById(gameObject.name);
 
-        if (currentApartment != null && currentApartment.status == "Chờ bán")
+        if (currentApartment != null && currentApartment.status == "Chờ bán" && menu.activeSelf == false)
         {
             apartmentText.text = $"Buy {currentApartment.id}";
             menu.SetActive(true);
