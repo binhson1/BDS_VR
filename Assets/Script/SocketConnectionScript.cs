@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections;
 using TMPro;
+using SocketIOClient.Newtonsoft.Json;
 
 public class SocketConnectionScript : MonoBehaviour
 {
@@ -18,20 +19,24 @@ public class SocketConnectionScript : MonoBehaviour
     private const string getApartmentByBlock = "getApartmentByBlock";
     private const string updateStatusToPending = "updateStatusToPending";
     private const string updateStatusToSold = "updateStatusToSold";
+    public TextMeshProUGUI textMesh;
     private ConcurrentQueue<string> responseQueue = new ConcurrentQueue<string>();
     void Start()
-    {       
+    {
         InitializeSocketClient();
+        textMesh.text = "Begin";
     }
     private async void InitializeSocketClient()
     {
         if (client == null)
         {
-            client = new SocketIO("ws://192.168.1.100:9000");
+            client = new SocketIO("ws://192.168.1.8:3000");
+            client.JsonSerializer = new NewtonsoftJsonSerializer();
             client.OnConnected += async (sender, e) =>
             {
                 Debug.Log("Connected to the server.");
                 await client.EmitAsync(GetAllApartmentsEvent);
+                textMesh.text += "Connected to the server.";
             };
             client.On("apartments", response =>
             {
@@ -120,6 +125,8 @@ public class SocketConnectionScript : MonoBehaviour
     void DeactivateBuyingMenu()
     {
         buyingMenu.SetActive(false);
+        buttonNo.SetActive(true);
+        buttonYes.SetActive(true);
     }
     public async void EmitHandleConfirm(string apartmentId)
     {

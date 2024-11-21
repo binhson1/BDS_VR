@@ -21,12 +21,10 @@ public class ApartmentData
 
 public class ApartmentManagerScript : MonoBehaviour
 {
-    private Dictionary<string, Color> statusColors = new Dictionary<string, Color>()
-    {
-        { "Đắt cọc", Color.yellow },
-        { "Đã bán", Color.red },
-        { "Chờ bán", Color.green },
-    };
+    // Public materials for each status, set these in the Unity Inspector
+    public Material reservedMaterial;  // "Đặt cọc"
+    public Material soldMaterial;      // "Đã bán"
+    public Material waitingMaterial;   // "Chờ bán"
 
     // Queue to store apartment data updates
     private ConcurrentQueue<ApartmentData[]> apartmentDataQueue = new ConcurrentQueue<ApartmentData[]>();
@@ -40,47 +38,61 @@ public class ApartmentManagerScript : MonoBehaviour
         {
             foreach (var apartment in apartments)
             {
-                apartmentDataDict[apartment.id] = apartment; // Cập nhật dữ liệu căn hộ trong dictionary
+                apartmentDataDict[apartment.id] = apartment; // Update apartment data in dictionary
             }
 
-            UpdateCubeColors(apartments);
+            UpdateCubeMaterials(apartments);
         }
     }
 
     // Thêm phương thức để lấy căn hộ theo ID
     public ApartmentData GetApartmentById(string id)
-    {        
-        // Trả về ApartmentData nếu tồn tại trong dictionary, ngược lại trả về null
+    {
+        // Return ApartmentData if it exists in the dictionary, otherwise return null
         if (apartmentDataDict.TryGetValue(id, out ApartmentData apartment))
         {
-            return apartment;            
+            return apartment;
         }
-        return null;        
+        return null;
     }
 
     public void EnqueueApartmentData(ApartmentData[] apartments)
     {
-        //Debug.Log("OKEY");
         apartmentDataQueue.Enqueue(apartments);
     }
 
-    private void UpdateCubeColors(ApartmentData[] apartments)
+    private void UpdateCubeMaterials(ApartmentData[] apartments)
     {
-        Debug.Log("Updating cube colors based on apartment data.");
+        Debug.Log("Updating cube materials based on apartment data.");
         foreach (var apartment in apartments)
         {
-            if (statusColors.ContainsKey(apartment.status))
+            Material materialToApply = null;
+
+            // Determine which material to apply based on apartment status
+            switch (apartment.status)
+            {
+                case "Đắt cọc":
+                    materialToApply = reservedMaterial;
+                    break;
+                case "Đã bán":
+                    materialToApply = soldMaterial;
+                    break;
+                case "Chờ bán":
+                    materialToApply = waitingMaterial;
+                    break;
+            }
+
+            if (materialToApply != null)
             {
                 GameObject cube = GameObject.Find(apartment.id);
                 if (cube != null)
                 {
-                    //Debug.Log("OKEY");
                     MeshRenderer renderer = cube.GetComponent<MeshRenderer>();
-                    renderer.material.color = statusColors[apartment.status];
+                    renderer.material = materialToApply; // Apply the selected material
                 }
                 else
                 {
-                    //Debug.Log($"Cube with ID {apartment.id} not found.");
+                    Debug.Log($"Cube with ID {apartment.id} not found.");
                 }
             }
         }

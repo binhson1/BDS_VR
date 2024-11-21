@@ -3,9 +3,10 @@
 public class ToggleGameObjectAfterDelay : MonoBehaviour
 {
     public GameObject targetObject; // Đối tượng cần bật/tắt
-    private bool isTriggered = false; // Trạng thái có đang chờ bật/tắt không
+    private bool isTriggered = false; // Cờ để theo dõi trạng thái
+    private bool isWaitingToEnable = false; // Theo dõi trạng thái bật sau delay
     private Vector3 originalScale; // Kích thước ban đầu của đối tượng
-    private float delayTime = 3f; // Thời gian trễ 3 giây
+    public float delayTime = 7f; // Thời gian trễ (có thể thay đổi từ Inspector)
     private float timer = 0f; // Bộ đếm thời gian
 
     void Start()
@@ -19,17 +20,16 @@ public class ToggleGameObjectAfterDelay : MonoBehaviour
 
     void Update()
     {
-        // Nếu đang chờ hết thời gian và cờ đang bật, tăng bộ đếm thời gian
-        if (isTriggered)
+        if (isWaitingToEnable)
         {
             timer += Time.deltaTime;
 
-            // Khi hết 3 giây, bật lại kích thước và đặt cờ về false
+            // Khi hết thời gian chờ, bật đối tượng và reset trạng thái
             if (timer >= delayTime)
             {
-                targetObject.transform.localScale = originalScale;
-                isTriggered = false;
-                timer = 0f; // Reset bộ đếm
+                targetObject.transform.localScale = originalScale; // Bật đối tượng
+                isWaitingToEnable = false;
+                timer = 0f;
             }
         }
     }
@@ -38,16 +38,21 @@ public class ToggleGameObjectAfterDelay : MonoBehaviour
     {
         if (!isTriggered)
         {
-            // Nếu chưa được kích hoạt, bắt đầu chế độ chờ và thu nhỏ đối tượng
-            targetObject.transform.localScale = Vector3.zero;
-            isTriggered = true; // Bắt đầu đếm thời gian 3 giây
+            // Nếu đối tượng đang tắt, chuẩn bị bật sau delay
+            if (!isWaitingToEnable)
+            {
+                isWaitingToEnable = true;
+                timer = 0f;
+                isTriggered = true; // Đánh dấu trạng thái bật
+            }
         }
         else
         {
-            // Nếu đã được kích hoạt, quay về kích thước ban đầu ngay lập tức và tắt chế độ chờ
-            targetObject.transform.localScale = originalScale;
-            isTriggered = false;
-            timer = 0f; // Reset bộ đếm
+            // Nếu đối tượng đang bật hoặc đang chờ bật, tắt ngay lập tức
+            targetObject.transform.localScale = Vector3.zero;
+            isWaitingToEnable = false; // Hủy chế độ chờ
+            timer = 0f;
+            isTriggered = false; // Đánh dấu trạng thái tắt
         }
     }
 }
