@@ -46,7 +46,6 @@ public class Play : MonoBehaviour
             StartCoroutine(ScaleVFX(manaVFX, manaVFX.transform.localScale, Vector3.zero, vfxScaleDuration)); // Scale manaVFX xuống
         }
     }
-
     void FixedUpdate()
     {
         if (isPlayingForward && animator.GetCurrentAnimatorStateInfo(0).IsName("Forward"))

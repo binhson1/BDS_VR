@@ -19,11 +19,11 @@ public class SocketConnectionScript : MonoBehaviour
     private const string GetAllApartmentsEvent = "getAllApartment";
     private const string getApartmentByBlock = "getApartmentByBlock";
     private const string updateStatusToPending = "updateStatusToPending";
-    private const string updateStatusToSold = "updateStatusToSold";    
+    private const string updateStatusToSold = "updateStatusToSold";
     private ConcurrentQueue<string> responseQueue = new ConcurrentQueue<string>();
     void Start()
     {
-        InitializeSocketClient();        
+        InitializeSocketClient();
     }
     private async void InitializeSocketClient()
     {
@@ -34,7 +34,7 @@ public class SocketConnectionScript : MonoBehaviour
             client.OnConnected += async (sender, e) =>
             {
                 Debug.Log("Connected to the server.");
-                await client.EmitAsync(GetAllApartmentsEvent);                
+                await client.EmitAsync(GetAllApartmentsEvent);
             };
             client.On("apartments", response =>
             {
@@ -86,6 +86,7 @@ public class SocketConnectionScript : MonoBehaviour
         {
             Debug.Log("SocketIO client already exists; reusing the existing instance.");
         }
+        Debug.LogWarning("Begin Connect Socket");
     }
 
     void Update()
@@ -122,7 +123,7 @@ public class SocketConnectionScript : MonoBehaviour
             Invoke("DeactivateBuyingMenu", 2f); // Gọi hàm sau 2 giây
         }
     }
-    void DeactivateBuyingMenu()
+    public void DeactivateBuyingMenu()
     {
         buyingMenu.SetActive(false);
         buttonNo.SetActive(true);
@@ -147,7 +148,7 @@ public class SocketConnectionScript : MonoBehaviour
             // Phát sự kiện "handleConfirmPendingButton" kèm theo dữ liệu JSON
             await client.EmitAsync(updateStatusToPending, apartmentUpdate);
         }
-    }   
+    }
 
     public async void EmitSoldConfirm(string apartmentId)
     {
@@ -165,7 +166,7 @@ public class SocketConnectionScript : MonoBehaviour
 
     public async void EmitGetEmployee()
     {
-        if(client != null && client.Connected)
+        if (client != null && client.Connected)
         {
             await client.EmitAsync("getAllEmployee");
         }

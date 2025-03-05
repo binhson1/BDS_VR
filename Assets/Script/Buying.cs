@@ -28,16 +28,17 @@ public class Buying : MonoBehaviour
     // Hàm thực hiện mua căn hộ dựa trên thông tin đã lưu
     public void ExecutePurchase()
     {
-        if (apartmentToBuy != null)
-        {
-            Debug.Log($"Executing purchase for apartment: {apartmentToBuy.id}");
-            socketConnectionScript.EmitHandleConfirm(apartmentToBuy.id);
-            apartmentToBuy = null;  // Reset sau khi mua xong
-        }
-        else
-        {
-            Debug.LogWarning("No apartment prepared for purchase.");
-        }
+        // if (apartmentToBuy != null)
+        // {
+        //     Debug.Log($"Executing purchase for apartment: {apartmentToBuy.id}");
+        //     socketConnectionScript.EmitHandleConfirm(apartmentToBuy.id);
+        //     apartmentToBuy = null;  // Reset sau khi mua xong
+        // }
+        // else
+        // {
+        //     Debug.LogWarning("No apartment prepared for purchase.");
+        // }
+        socketConnectionScript.DeactivateBuyingMenu();
     }
     public void Cancel()
     {
